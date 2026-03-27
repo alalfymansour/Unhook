@@ -74,6 +74,9 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
     @Volatile
     private var tapBlockUntilUptime: Long = 0L
 
+    @Volatile
+    private var tiktokExitCooldownUntilUptime: Long = 0L
+
     private var overlayView: BlockSwipeOverlay? = null
     private var frictionDialogView: View? = null
     private var isNotificationVisible: Boolean = false
@@ -182,6 +185,10 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
             return
         }
 
+        if (handleTikTokHardBlock(packageName)) {
+            return
+        }
+
         updateVideoFeedState(force = true)
         applyOverlayBlockingMode()
     }
@@ -194,6 +201,10 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
 
         if (!shouldManagePackage(packageName)) {
             clearBlockingState()
+            return
+        }
+
+        if (handleTikTokHardBlock(packageName)) {
             return
         }
 
@@ -220,8 +231,27 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
             return
         }
 
+        val packageName = currentForegroundPackage ?: return
+        if (handleTikTokHardBlock(packageName)) {
+            return
+        }
+
         updateVideoFeedState(force = true)
         applyOverlayBlockingMode()
+    }
+
+    private fun handleTikTokHardBlock(packageName: String): Boolean {
+        if (packageName != TIKTOK_PACKAGE) {
+            return false
+        }
+
+        clearBlockingState()
+        val now = SystemClock.uptimeMillis()
+        if (now >= tiktokExitCooldownUntilUptime) {
+            tiktokExitCooldownUntilUptime = now + TIKTOK_EXIT_COOLDOWN_MS
+            performGlobalAction(GLOBAL_ACTION_HOME)
+        }
+        return true
     }
 
     private fun applyOverlayBlockingMode() {
@@ -623,7 +653,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
         )
 
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_unhook_notification)
+            .setSmallIcon(R.drawable.unhook_statusbar_icon)
             .setLargeIcon(notificationLogoBitmap)
             .setContentTitle(getString(R.string.notification_title))
             .setContentText(getString(R.string.notification_content))
@@ -657,7 +687,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
         private const val NOTIFICATION_CHANNEL_ID = "unhook_service"
         private const val NOTIFICATION_ID = 1001
         private const val NOTIFICATION_LOGO_WIDTH = 192
-        private const val NOTIFICATION_LOGO_HEIGHT = 128
+        private const val NOTIFICATION_LOGO_HEIGHT = 192
 
         private const val INSTAGRAM_PACKAGE = "com.instagram.android"
         private const val FACEBOOK_PACKAGE = "com.facebook.katana"
@@ -670,10 +700,11 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
         private const val ENTRY_ALLOW_WINDOW_MS = 7000L
         private const val CONTINUE_DELAY_MS = 3000L
         private const val CONTENT_SCAN_DEBOUNCE_MS = 500L
+        private const val TIKTOK_EXIT_COOLDOWN_MS = 1200L
     }
 
     private val notificationLogoBitmap: Bitmap by lazy(LazyThreadSafetyMode.NONE) {
-        val source = BitmapFactory.decodeResource(resources, R.drawable.unhook_logo)
+        val source = BitmapFactory.decodeResource(resources, R.drawable.unhook_icon)
         Bitmap.createScaledBitmap(
             source,
             NOTIFICATION_LOGO_WIDTH,

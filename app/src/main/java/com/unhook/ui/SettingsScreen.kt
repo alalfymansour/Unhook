@@ -1,5 +1,6 @@
 package com.unhook.ui
 
+import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -23,20 +25,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import com.unhook.R
 import com.unhook.data.TargetApp
 
 @Composable
 fun SettingsScreen(
     appEnabled: Boolean,
-    accessibilityEnabled: Boolean,
     enabledPackages: Set<String>,
     targetApps: List<TargetApp>,
     onAppEnabledChange: (Boolean) -> Unit,
@@ -46,51 +49,27 @@ fun SettingsScreen(
     onDismissPrompt: () -> Unit,
     onConfirmPrompt: () -> Unit,
 ) {
-    val isActive = appEnabled && accessibilityEnabled
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
             painter = painterResource(id = R.drawable.unhook_logo),
             contentDescription = "Unhook logo",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(108.dp),
+                .height(112.dp),
             contentScale = ContentScale.Fit,
         )
         Text(
-            text = "Break infinite-scroll loops by intercepting vertical swipes only in selected apps.",
+            text = "Unhook yourself from corporations' chains.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
         )
-
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = if (isActive) Color(0xFF132D5C) else Color(0xFF1A2338),
-            ),
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = if (isActive) "Status: Active" else "Status: Inactive",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (accessibilityEnabled) {
-                        "Accessibility service is enabled."
-                    } else {
-                        "Accessibility service is disabled. Turn it on so Unhook can work."
-                    },
-                )
-            }
-        }
 
         Card {
             Row(
@@ -141,17 +120,12 @@ fun SettingsScreen(
                                 onPackageEnabledChange(app.packageName, checked)
                             },
                         )
-                        Column {
-                            Text(
-                                text = app.label,
-                                style = MaterialTheme.typography.titleSmall,
-                            )
-                            Text(
-                                text = app.packageName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                            )
-                        }
+                        TargetAppIcon(packageName = app.packageName, label = app.label)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = app.label,
+                            style = MaterialTheme.typography.titleSmall,
+                        )
                     }
                     if (index != targetApps.lastIndex) {
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -188,4 +162,42 @@ fun SettingsScreen(
             },
         )
     }
+}
+
+@Composable
+private fun TargetAppIcon(packageName: String, label: String) {
+    val context = LocalContext.current
+    val appIcon = remember(packageName) {
+        val packagesForIcon = when (packageName) {
+            "com.zhiliaoapp.musically" -> listOf(
+                "com.zhiliaoapp.musically",
+                "com.zhiliaoapp.musically.go",
+                "com.ss.android.ugc.trill",
+            )
+            else -> listOf(packageName)
+        }
+
+        packagesForIcon.firstNotNullOfOrNull { candidatePackage ->
+            runCatching {
+                val appInfo = context.packageManager.getApplicationInfo(candidatePackage, 0)
+                appInfo.loadUnbadgedIcon(context.packageManager)
+            }.getOrNull()
+        }
+    }
+
+    AndroidView(
+        modifier = Modifier.size(24.dp),
+        factory = { ctx ->
+            ImageView(ctx).apply {
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                adjustViewBounds = true
+            }
+        },
+        update = { imageView ->
+            imageView.contentDescription = "$label icon"
+            imageView.setImageDrawable(
+                appIcon ?: ContextCompat.getDrawable(context, R.drawable.ic_unhook_foreground),
+            )
+        },
+    )
 }

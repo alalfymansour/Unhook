@@ -1,14 +1,24 @@
 # Unhook
 
-Unhook is a lightweight Android digital friction app that interrupts infinite-scroll behavior by blocking vertical swipes inside selected social apps.
+Unhook is a lightweight Android digital-friction app that interrupts infinite-scroll behavior inside selected social apps.
 
-It does not block app access. It only blocks the addictive vertical gesture loop.
+Core idea: Unhook yourself from corporations' chains.
+
+Unhook pushes back against algorithmic compulsion by adding deliberate friction where addictive loops usually win.
+
+## Philosophy
+
+- You own your attention.
+- Products should serve users, not trap them.
+- Friction can be a feature when it protects autonomy.
+- Offline-first design protects privacy and trust.
 
 ## Features
 
 - Accessibility-driven, event-based behavior
-- Blocks vertical swipe gestures only in selected target apps
+- Blocks vertical swipe gestures in short-video contexts for selected apps
 - Allows taps and non-vertical interaction paths where possible
+- Optional hard block for TikTok app opening (when TikTok is enabled in target apps)
 - User-configurable target app list (DataStore)
 - Offline by design (no network, no analytics, no tracking)
 
@@ -18,6 +28,7 @@ It does not block app access. It only blocks the addictive vertical gesture loop
 - `com.facebook.katana`
 - `com.google.android.youtube`
 - `com.twitter.android`
+- `com.zhiliaoapp.musically`
 
 ## Architecture
 
@@ -30,9 +41,10 @@ It does not block app access. It only blocks the addictive vertical gesture loop
 ## How it works
 
 1. `UnhookAccessibilityService` listens for `TYPE_WINDOW_STATE_CHANGED`.
-2. If foreground app package is enabled, it adds a transparent full-screen overlay.
-3. Overlay detects swipe direction and blocks only vertical swipes above threshold.
-4. On app switch, overlay is removed immediately.
+2. If a supported foreground app is enabled, the service evaluates screen context.
+3. In detected short-video contexts, a transparent full-screen overlay blocks vertical swipes.
+4. Non-target contexts keep normal interaction flow.
+5. For TikTok, if enabled, Unhook can immediately exit the app to Home.
 
 ## Build requirements
 

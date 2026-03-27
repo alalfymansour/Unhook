@@ -64,7 +64,6 @@ open class SettingsActivity : ComponentActivity() {
                 Surface {
                     SettingsScreen(
                         appEnabled = appEnabled,
-                        accessibilityEnabled = accessibilityEnabled,
                         enabledPackages = enabledPackages,
                         targetApps = AppPreferences.supportedApps,
                         onAppEnabledChange = { enabled ->

@@ -28,7 +28,7 @@ object AppPreferences {
         TargetApp(label = "Instagram", packageName = "com.instagram.android"),
         TargetApp(label = "Facebook", packageName = "com.facebook.katana"),
         TargetApp(label = "YouTube", packageName = "com.google.android.youtube"),
-        TargetApp(label = "X / Twitter", packageName = "com.twitter.android"),
+        TargetApp(label = "X", packageName = "com.twitter.android"),
         TargetApp(label = "TikTok", packageName = "com.zhiliaoapp.musically"),
     )
 
