@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Unhook</string>
+    <string name="accessibility_description">Blocks vertical swipe gestures in selected social media apps to reduce infinite scrolling.</string>
+    <string name="accessibility_service_description">Blocks vertical swipe gestures in selected social media apps to reduce infinite scrolling.</string>
+    <string name="notification_channel_name">Unhook Protection</string>
+    <string name="notification_channel_description">Shown while Unhook accessibility service is running.</string>
+    <string name="notification_title">Unhook is active</string>
+    <string name="notification_content">Vertical swipe blocking is ready in selected apps.</string>
+</resources>

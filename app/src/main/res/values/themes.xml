@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Unhook" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/unhook_blue</item>
+        <item name="colorPrimaryVariant">@color/unhook_blue_deep</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@color/unhook_blue_soft</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="android:colorBackground">@color/unhook_bg</item>
+        <item name="colorSurface">@color/unhook_surface</item>
+        <item name="android:textColorPrimary">@color/unhook_text</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

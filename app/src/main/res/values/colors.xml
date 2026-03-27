@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="unhook_blue">#2D7CFF</color>
+    <color name="unhook_blue_deep">#0D4EC9</color>
+    <color name="unhook_blue_soft">#6BA6FF</color>
+    <color name="unhook_bg">#060B16</color>
+    <color name="unhook_surface">#0E1628</color>
+    <color name="unhook_text">#E8EEFF</color>
+</resources>
