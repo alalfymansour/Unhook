@@ -83,4 +83,5 @@ Unhook is fully offline.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Non-commercial only. Any commercial use is prohibited without prior written permission.
+See [LICENSE](LICENSE).
