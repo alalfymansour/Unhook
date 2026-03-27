@@ -1,5 +1,7 @@
 package com.unhook.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,6 +51,8 @@ fun SettingsScreen(
     onDismissPrompt: () -> Unit,
     onConfirmPrompt: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,6 +143,16 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
         )
+
+        Button(
+            onClick = {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(OFFICIAL_REPO_URL))
+                context.startActivity(browserIntent)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Official GitHub Repository")
+        }
     }
 
     if (showFirstLaunchPrompt) {
@@ -163,6 +177,8 @@ fun SettingsScreen(
         )
     }
 }
+
+private const val OFFICIAL_REPO_URL = "https://github.com/alalfymansour/Unhook.git"
 
 @Composable
 private fun TargetAppIcon(packageName: String, label: String) {
