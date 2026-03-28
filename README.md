@@ -1,3 +1,7 @@
+<p align="center">
+	<img src="Unhook%20Icon.png" alt="Unhook logo" width="140" />
+</p>
+
 # Unhook
 
 Unhook is a lightweight Android digital-friction app that interrupts infinite-scroll behavior inside selected social apps.
