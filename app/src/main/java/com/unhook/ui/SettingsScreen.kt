@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.unhook.R
+import com.unhook.data.SupportedPackages
 import com.unhook.data.TargetApp
 
 @Composable
@@ -185,11 +186,7 @@ private fun TargetAppIcon(packageName: String, label: String) {
     val context = LocalContext.current
     val appIcon = remember(packageName) {
         val packagesForIcon = when (packageName) {
-            "com.zhiliaoapp.musically" -> listOf(
-                "com.zhiliaoapp.musically",
-                "com.zhiliaoapp.musically.go",
-                "com.ss.android.ugc.trill",
-            )
+            SupportedPackages.TIKTOK -> SupportedPackages.tiktokIconCandidates
             else -> listOf(packageName)
         }
 

@@ -25,11 +25,11 @@ object AppPreferences {
     private val hasSeenAccessibilityPromptKey = booleanPreferencesKey("has_seen_accessibility_prompt")
 
     val supportedApps: List<TargetApp> = listOf(
-        TargetApp(label = "Instagram", packageName = "com.instagram.android"),
-        TargetApp(label = "Facebook", packageName = "com.facebook.katana"),
-        TargetApp(label = "YouTube", packageName = "com.google.android.youtube"),
-        TargetApp(label = "X", packageName = "com.twitter.android"),
-        TargetApp(label = "TikTok", packageName = "com.zhiliaoapp.musically"),
+        TargetApp(label = "Instagram", packageName = SupportedPackages.INSTAGRAM),
+        TargetApp(label = "Facebook", packageName = SupportedPackages.FACEBOOK),
+        TargetApp(label = "YouTube", packageName = SupportedPackages.YOUTUBE),
+        TargetApp(label = "X", packageName = SupportedPackages.X_APP),
+        TargetApp(label = "TikTok", packageName = SupportedPackages.TIKTOK),
     )
 
     val defaultTargetPackages: Set<String> = supportedApps.map { it.packageName }.toSet()

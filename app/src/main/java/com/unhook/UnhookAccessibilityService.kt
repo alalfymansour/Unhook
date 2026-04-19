@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Path
 import android.graphics.PixelFormat
-import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -32,6 +31,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.unhook.data.AppPreferences
+import com.unhook.data.SupportedPackages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,7 +46,6 @@ import java.util.Locale
 class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.GesturePassthroughDispatcher {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val tempRect = Rect()
 
     private lateinit var windowManager: WindowManager
 
@@ -241,7 +240,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
     }
 
     private fun handleTikTokHardBlock(packageName: String): Boolean {
-        if (packageName != TIKTOK_PACKAGE) {
+        if (packageName != SupportedPackages.TIKTOK) {
             return false
         }
 
@@ -329,19 +328,19 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
             isInVideoFeed = false
             return
         }
-        if (packageName == TIKTOK_PACKAGE) {
+        if (packageName == SupportedPackages.TIKTOK) {
             isInVideoFeed = true
             return
         }
         val root = rootInActiveWindow ?: run {
-            Log.w("UnhookDebug", "[$packageName] rootInActiveWindow is NULL")
+            Log.w(DEBUG_TAG, "[$packageName] rootInActiveWindow is NULL")
             if (force) isInVideoFeed = false
             return
         }
         try {
-            Log.d("UnhookDebug", "[$packageName] root childCount=${root.childCount} | scanning tree...")
+            Log.d(DEBUG_TAG, "[$packageName] root childCount=${root.childCount} | scanning tree...")
             val result = detectVideoFeedNode(root, packageName)
-            Log.d("UnhookDebug", "[$packageName] detectVideoFeedNode=$result | wasInFeed=$isInVideoFeed")
+            Log.d(DEBUG_TAG, "[$packageName] detectVideoFeedNode=$result | wasInFeed=$isInVideoFeed")
             isInVideoFeed = result
         } finally {
             root.recycle()
@@ -350,7 +349,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
 
     private fun detectVideoFeedNode(root: AccessibilityNodeInfo, packageName: String): Boolean {
         return when (packageName) {
-            INSTAGRAM_PACKAGE -> {
+            SupportedPackages.INSTAGRAM -> {
                 containsResourceIdPattern(
                     root,
                     "clips_viewer_view_pager",
@@ -360,7 +359,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
                 )
             }
 
-            FACEBOOK_PACKAGE -> {
+            SupportedPackages.FACEBOOK -> {
                 containsContentDescPattern(
                     root,
                     "reel details",
@@ -370,7 +369,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
                 )
             }
 
-            YOUTUBE_PACKAGE -> {
+            SupportedPackages.YOUTUBE -> {
                 containsResourceIdPattern(
                     root,
                     "shorts_player",
@@ -379,7 +378,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
                 ) || containsClassPattern(root, "ShortsActivity", "ReelWatchFragment")
             }
 
-            X_PACKAGE -> {
+            SupportedPackages.X_APP -> {
                 containsResourceIdPattern(
                     root,
                     "video_player_view",
@@ -388,7 +387,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
                 )
             }
 
-            TIKTOK_PACKAGE -> true
+            SupportedPackages.TIKTOK -> true
             else -> false
         }
     }
@@ -426,11 +425,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
         matcher: (AccessibilityNodeInfo) -> Boolean,
     ): Boolean {
         val pkg = currentForegroundPackage ?: ""
-        val shouldLog = debugNodeCount < 40 && pkg in listOf(
-            INSTAGRAM_PACKAGE,
-            FACEBOOK_PACKAGE,
-            X_PACKAGE,
-        )
+        val shouldLog = debugNodeCount < 40 && pkg in DEBUG_LOG_PACKAGES
         if (shouldLog) {
             val rid = root.viewIdResourceName
             val cls = root.className?.toString() ?: ""
@@ -438,7 +433,7 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
             val scrollable = root.isScrollable
             if (!rid.isNullOrEmpty() || scrollable) {
                 Log.d(
-                    "UnhookDebug",
+                    DEBUG_TAG,
                     "[tree:${pkg.substringAfterLast('.')}] id=${rid ?: "null"} | class=$cls | scrollable=$scrollable | desc=${desc.take(40)}",
                 )
                 debugNodeCount++
@@ -466,18 +461,18 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
         source.recycle()
 
         val isEntryTap = when (packageName) {
-            INSTAGRAM_PACKAGE -> {
+            SupportedPackages.INSTAGRAM -> {
                 resourceId.contains("clips_tab") ||
                     contentDesc == "reels"
             }
-            YOUTUBE_PACKAGE -> {
+            SupportedPackages.YOUTUBE -> {
                 (resourceId.contains("pivot_bar_item") && contentDesc.contains("shorts")) ||
                     contentDesc.contains("shorts")
             }
-            FACEBOOK_PACKAGE -> {
+            SupportedPackages.FACEBOOK -> {
                 contentDesc.contains("reels") && contentDesc.contains("tab")
             }
-            X_PACKAGE -> false
+            SupportedPackages.X_APP -> false
             else -> false
         }
 
@@ -684,16 +679,16 @@ class UnhookAccessibilityService : AccessibilityService(), BlockSwipeOverlay.Ges
 
     private companion object {
         private const val TAG = "UnhookService"
+        private const val DEBUG_TAG = "UnhookDebug"
         private const val NOTIFICATION_CHANNEL_ID = "unhook_service"
         private const val NOTIFICATION_ID = 1001
         private const val NOTIFICATION_LOGO_WIDTH = 192
         private const val NOTIFICATION_LOGO_HEIGHT = 192
-
-        private const val INSTAGRAM_PACKAGE = "com.instagram.android"
-        private const val FACEBOOK_PACKAGE = "com.facebook.katana"
-        private const val YOUTUBE_PACKAGE = "com.google.android.youtube"
-        private const val X_PACKAGE = "com.twitter.android"
-        private const val TIKTOK_PACKAGE = "com.zhiliaoapp.musically"
+        private val DEBUG_LOG_PACKAGES = setOf(
+            SupportedPackages.INSTAGRAM,
+            SupportedPackages.FACEBOOK,
+            SupportedPackages.X_APP,
+        )
 
         private const val PASSTHROUGH_GAP_MS = 120L
         private const val ENTRY_TAP_BLOCK_WINDOW_MS = 1100L
